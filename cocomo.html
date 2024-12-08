@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COCOMO - Estimación de Costos de Software</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            color: #333;
+            text-align: center;
+        }
+        header {
+            background: #0c0aa3;
+            color: white;
+            padding: 20px 0;
+        }
+        h1, h2 {
+            margin: 10px 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgb(17, 144, 175);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            text-align: left;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #325992;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #26a1c7;
+        }
+        #resultado {
+            margin-top: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background: #488ce4;
+            color: white;
+        }
+        footer {
+            margin-top: 20px;
+            background: #2c01a3;
+            color: white;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ESTIMACIÓN DE COSTOS DE SOFTWARE</h1>
+        <p>Basado en el Modelo COCOMO</p>
+    </header>
+
+    <div class="container">
+        <h2>Entrada de Datos</h2>
+        <label for="entrada">Número de entradas:</label>
+        <input type="number" id="entrada" placeholder="Ingrese el número de entradas" min="0">
+
+        <label for="salida">Número de salidas:</label>
+        <input type="number" id="salida" placeholder="Ingrese el número de salidas" min="0">
+
+        <h2>Cálculo de Factor de Ponderación</h2>
+        <label for="organico">Orgánico (50 a 80):</label>
+        <input type="number" id="organico" min="50" max="80" step="1" value="50">
+
+        <label for="semiacoplado">Semiacoplado (81 a 100):</label>
+        <input type="number" id="semiacoplado" min="81" max="100" step="1" value="81">
+
+        <label for="acoplado">Acoplado (101 a 150):</label>
+        <input type="number" id="acoplado" min="101" max="150" step="1" value="101">
+
+        <h2>Seleccionar el Factor de Ponderación</h2>
+        <label for="factor">Selecciona el tipo de factor:</label>
+        <select id="factor">
+            <option value="organico">ORGÁNICO</option>
+            <option value="semiacoplado">SEMIACOPLADO</option>
+            <option value="acoplado">ACOPLADO</option>
+        </select>
+
+        <h2>Datos Adicionales</h2>
+        <label for="salario">Ingrese el salario mensual promedio (Bs.):</label>
+        <input type="number" id="salario" placeholder="Ingrese el salario mensual" min="0">
+
+        <button onclick="calcular()">Calcular</button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <footer>
+        <p>Nombres y Apellido: <strong>Moises Lenz Caro Miranda</strong></p>
+        <p>C.I.: <strong>8469734</strong></p>
+        <p>R.U.: <strong>200059870</strong></p>
+    </footer>
+
+    <script>
+        function calcular() {
+            const entrada = parseInt(document.getElementById('entrada').value) || 0;
+            const salida = parseInt(document.getElementById('salida').value) || 0;
+            const total = entrada + salida;
+
+            const organico = parseInt(document.getElementById('organico').value);
+            const semiacoplado = parseInt(document.getElementById('semiacoplado').value);
+            const acoplado = parseInt(document.getElementById('acoplado').value);
+
+            const factorSeleccionado = document.getElementById('factor').value;
+            const salario = parseFloat(document.getElementById('salario').value) || 0;
+
+            let lcd = 0;
+            let E = 0;
+            let TD = 0;
+
+            if (factorSeleccionado === "organico") {
+                lcd = organico * total;
+                E = 2.4 * Math.pow(lcd / 1000, 1.05);
+                TD = 2.5 * Math.pow(E, 0.38);
+            } else if (factorSeleccionado === "semiacoplado") {
+                lcd = semiacoplado * total;
+                E = 3 * Math.pow(lcd / 1000, 1.12);
+                TD = 2.5 * Math.pow(E, 0.35);
+            } else if (factorSeleccionado === "acoplado") {
+                lcd = acoplado * total;
+                E = 3.6 * Math.pow(lcd / 1000, 1.20);
+                TD = 2.5 * Math.pow(E, 0.32);
+            }
+
+            const MLCD = lcd / 1000;
+            const CP = E / TD;
+            const P = lcd / E;
+            const COSTO = E * salario;
+            const COSTOLCD = COSTO / lcd;
+
+            const resultado = `
+                <table>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Resultado</th>
+                    </tr>
+                    <tr>
+                        <td>Total de entradas y salidas</td>
+                        <td>${total}</td>
+                    </tr>
+                    <tr>
+                        <td>Factor de ponderación seleccionado</td>
+                        <td>${factorSeleccionado === "organico" ? organico : factorSeleccionado === "semiacoplado" ? semiacoplado : acoplado}</td>
+                    </tr>
+                    <tr>
+                        <td>Número de líneas de código (LCD)</td>
+                        <td>${lcd}</td>
+                    </tr>
+                    <tr>
+                        <td>Miles de líneas de código (MLCD)</td>
+                        <td>${MLCD.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td>Esfuerzo nominal (E)</td>
+                        <td>${E.toFixed(2)} - (${Math.round(E)}) persona-meses</td>
+                    </tr>
+                    <tr>
+                        <td>Tiempo de desarrollo (TD)</td>
+                        <td>${TD.toFixed(2)} - (${Math.round(TD)}) meses</td>
+                    </tr>
+                    <tr>
+                        <td>Personal necesario (CP)</td>
+                        <td>${CP.toFixed(2)} - (${Math.round(CP)}) personas</td>
+                    </tr>
+                    <tr>
+                        <td>Productividad (P)</td>
+                        <td>${P.toFixed(2)} - (${Math.round(P)}) LCD/persona-mes</td>
+                    </tr>
+                    <tr>
+                        <td>Costo total del proyecto</td>
+                        <td>${COSTO.toFixed(2)} Bs.</td>
+                    </tr>
+                    <tr>
+                        <td>Costo por línea de código</td>
+                        <td>${COSTOLCD.toFixed(2)} Bs.</td>
+                    </tr>
+                </table>
+            `;
+            document.getElementById('resultado').innerHTML = resultado;
+        }
+    </script>
+</body>
+</html>
